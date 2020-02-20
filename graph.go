@@ -219,13 +219,15 @@ func (graph *Graph) DeleteEdge(from ID, to ID) interface{} {
 // AddVertexWithEdges adds a vertex value which implements Vertex interface.
 // AddVertexWithEdges adds edges connected to the vertex at the same time, due to the Vertex interface can get the Edges.
 func (graph *Graph) AddVertexWithEdges(v Vertex) error {
-	if _, exists := graph.vertices[v.ID()]; exists {
-		return fmt.Errorf("Vertex %v is duplicate", v.ID())
+	if graph.vertices[v.ID()] == nil {
+		graph.vertices[v.ID()] = &vertex{v, true}
 	}
-
-	graph.vertices[v.ID()] = &vertex{v, true}
-	graph.egress[v.ID()] = make(map[ID]*edge)
-	graph.ingress[v.ID()] = make(map[ID]*edge)
+	if graph.egress[v.ID()] == nil {
+		graph.egress[v.ID()] = make(map[ID]*edge)
+	}
+	if graph.ingress[v.ID()] == nil {
+		graph.ingress[v.ID()] = make(map[ID]*edge)
+	}
 
 	for _, eachEdge := range v.Edges() {
 		from, to, weight := eachEdge.Get()
